@@ -22,7 +22,7 @@ def readNodes(meshFile, quiet = True):
 
     line = meshFile.readline()
     
-    if line.find("$EndNodes"):
+    if line.find("$EndNodes") != -1:
 
       quit = True
       continue
@@ -37,14 +37,73 @@ def readNodes(meshFile, quiet = True):
       Z = float(nodeData[3])
 
       nodes.append(nodeClass(X, Y, Z, idx))
-      if not quiet:
-        print "node: %i %e %e %e" % (idx, X, Y, Z)
+
+  # Error checking
+  assert(len(nodes) == nNodes)
+  print "nNodes = %i" % nNodes
+
+def readElems(meshFile, quiet = True):
+
+  line = meshFile.readline()
+  nElem = int(line)
+  if not quiet:
+
+    print "nElem = %i" %nCells
+
+  elem = []
+  cells = []
+  faces = []
+  nCells = 0
+  nFaces = 0
+  quit = False
+  while not quit:
+
+    line = meshFile.readline()
+
+    if line.find("$EndElements") != -1:
+
+      quit = True
+      continue
+
+    else:
+
+      elemData = line.split()
+
+      idx = int(elemData[0])
+      elemType = int(elemData[1])
+      nTags = int(elemData[2])
+      entry = 3
+      for tag in range(nTags):
+        entry += 1
+      nodes = []
+      for n in range(entry, len(elemData)):
+        nodes.append(int(elemData[n]))
+      nNodes = len(nodes)
+
+      if (elemType == 2) or (elemType == 3):
+
+        # Face ( 2 is triangle, 3 is quadrangle )
+        faces.append(faceClass(nodes, nFaces))
+        elem.append(["face", nFaces])
+
+        nFaces += 1
+
+      elif (elemType > 3) and (elemType < 8):
+
+        # Volume element: ( 4 is TET, 5 is HEX, 6 is WEDGE, 7 is 5-node pyramid)
+        cells.append(cellClass(nodes, nCells))
+        elem.append(["cell", nCells])
+
+        nCells += 1
+
+  print "nCells = %i" % nCells
+  print "nFaces = %i" % nFaces
 
 def readMesh(filePath, quiet = True):
 
   # KEYWORDS in gmsh
-  KEYWORDS = ["$Nodes\n"]
-  funcArr = [readNodes]
+  KEYWORDS = ["$Nodes\n", "$Elements\n"]
+  funcArr = [readNodes, readElems]
 
   # Open and read file
   with open(filePath, "r") as meshFile:
