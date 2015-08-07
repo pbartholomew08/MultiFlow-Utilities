@@ -22,7 +22,7 @@ def readNodes(meshFile, quiet = True):
 
     line = meshFile.readline()
     
-    if line is "$EndNodes\n":
+    if line.find("$EndNodes"):
 
       quit = True
       continue
@@ -63,4 +63,3 @@ def readMesh(filePath, quiet = True):
           func = funcArr[KEYWORDS.index(line)]
           func(meshFile, quiet)
 
-          print meshFile.readline()
