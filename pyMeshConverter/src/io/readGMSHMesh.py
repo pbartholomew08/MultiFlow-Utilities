@@ -36,11 +36,13 @@ def readNodes(meshFile, quiet = True):
       Y = float(nodeData[2])
       Z = float(nodeData[3])
 
-      nodes.append(nodeClass(X, Y, Z, idx))
+      nodes.append([idx, X, Y, Z])
 
   # Error checking
   assert(len(nodes) == nNodes)
   print "nNodes = %i" % nNodes
+
+  return [nodes], ["nodes"]
 
 def readElems(meshFile, quiet = True):
 
@@ -105,6 +107,8 @@ def readMesh(filePath, quiet = True):
   KEYWORDS = ["$Nodes\n", "$Elements\n"]
   funcArr = [readNodes, readElems]
 
+  meshData = {}
+
   # Open and read file
   with open(filePath, "r") as meshFile:
 
@@ -120,5 +124,45 @@ def readMesh(filePath, quiet = True):
         if line in KEYWORDS:
           
           func = funcArr[KEYWORDS.index(line)]
-          func(meshFile, quiet)
+          data, keys = func(meshFile, quiet)
 
+          nFields = len(data)
+          for d in range(nFields):
+
+            meshData[keys[d]] = data[d]
+
+  # Make node, cell, face arrays
+  nNodes = len(meshData["nodes"])
+  nCells = len(meshData["cells"])
+  nFaces = len(meshData["faces"])
+
+  nodes = [0] * nNodes
+  cells = [0] * nCells
+  faces = [0] * nFaces
+
+  for n in range(nNodes):
+
+    idx = meshData["nodes"][n][0]
+    x = meshData["nodes"][n][1]
+    y = meshData["nodes"][n][2]
+    z = meshData["nodes"][n][2]
+
+    nodes[n] = nodeClass(x, y, z, idx)
+
+  for c in range(nCells):
+
+    idx = meshData["cells"][c][0]
+    nodeArr = meshData["cells"][c][1]
+
+    cells[c] = cellClass(nodeArr, idx)
+
+  for f in range(nFaces):
+
+    idx = meshData["faces"][f][0]
+    nodeArr = meshData["faces"][f][1]
+
+    faces[f] = faceClass(nodeArr, idx)
+
+  mesh = meshClass(nodes, cells, faces)
+
+  return mesh
