@@ -43,15 +43,16 @@ def getResidualNorms(filePath, fileName, time, normalise = True):
     for eq in range(nEq):
 
       norm0 = eqNorms[eq][0]
+      if norm0:
+        for i in range(len(eqNorms[eq])):
 
-      for i in range(len(eqNorms[eq])):
-
-        eqNorms[eq][i] /= norm0
+          eqNorms[eq][i] /= norm0
 
     norm0 = sysNorm[0]
-    for i in range(len(sysNorm)):
-
-      sysNorm[i] /= norm0
+    if norm0:
+      for i in range(len(sysNorm)):
+  
+        sysNorm[i] /= norm0
 
   return eqNorms, sysNorm
 
@@ -64,12 +65,28 @@ def plotResidualNorms(filePath, fileName, time, normalise = True):
 
   eqNorms, sysNorm = getResidualNorms(filePath, fileName, time, normalise)
 
+  linestyles = ['-', '--', '-.', ':']
+  markers = ['', '+', '*', 'o']
+
   nEq = len(eqNorms)
+  l = 0
+  m = 0
   for eq in range(nEq):
 
-    plt.plot(eqNorms[eq], label = "Equation " + str(eq))
+    plt.plot(eqNorms[eq], label = "Equation " + str(eq), marker = markers[m], linestyle = linestyles[l], color='k')
 
-  plt.plot(sysNorm, label = "System")
+    m += 1
+    if m > len(markers) - 1:
+
+      l += 1
+      m = 0
+
+    if l > len(linestyles) - 1:
+
+      print "Ran out of lines!"
+      exit
+
+  plt.plot(sysNorm, label = "System", marker = markers[m], linestyle = linestyles[l], color = 'k')
 
   # Format plot
   plt.legend()
@@ -79,5 +96,7 @@ def plotResidualNorms(filePath, fileName, time, normalise = True):
   if normalise:
 
     plt.ylabel("Normalised Value")
+
+  plt.title("Residuals @ t = " + "%.3e" % time + " s")
 
   plt.show()
