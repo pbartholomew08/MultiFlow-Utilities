@@ -85,7 +85,7 @@ def readElems(meshFile, quiet = True):
       if (elemType == 2) or (elemType == 3):
 
         # Face ( 2 is triangle, 3 is quadrangle )
-        faces.append(faceClass(nodes, nFaces))
+        faces.append([nFaces, nodes])
         elem.append(["face", nFaces])
 
         nFaces += 1
@@ -93,13 +93,15 @@ def readElems(meshFile, quiet = True):
       elif (elemType > 3) and (elemType < 8):
 
         # Volume element: ( 4 is TET, 5 is HEX, 6 is WEDGE, 7 is 5-node pyramid)
-        cells.append(cellClass(nodes, nCells))
+        cells.append([nCells, nodes])
         elem.append(["cell", nCells])
 
         nCells += 1
 
   print "nCells = %i" % nCells
   print "nFaces = %i" % nFaces
+
+  return [cells, faces], ["cells", "faces"]
 
 def readMesh(filePath, quiet = True):
 
@@ -154,15 +156,26 @@ def readMesh(filePath, quiet = True):
     idx = meshData["cells"][c][0]
     nodeArr = meshData["cells"][c][1]
 
-    cells[c] = cellClass(nodeArr, idx)
+    cellNodes = []
+    for n in nodeArr:
+
+      cellNodes.append(nodes[n - 1])
+
+    cells[c] = cellClass(cellNodes, idx)
 
   for f in range(nFaces):
 
     idx = meshData["faces"][f][0]
     nodeArr = meshData["faces"][f][1]
 
-    faces[f] = faceClass(nodeArr, idx)
+    faceNodes = []
+    for n in nodeArr:
 
+      faceNodes.append(nodes[n - 1])
+
+    faces[f] = faceClass(faceNodes, idx)
+
+  print "Creating mesh"
   mesh = meshClass(nodes, cells, faces)
 
   return mesh
