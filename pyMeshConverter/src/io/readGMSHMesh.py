@@ -175,6 +175,56 @@ def readMesh(filePath, quiet = True):
 
     faces[f] = faceClass(faceNodes, idx)
 
+  # Link cells / faces
+  print "Linking cells-faces"
+  complete = 0
+  completeOld = 0
+  nFacesInv = 1.0 / nFaces
+  for f in range(nFaces):
+
+    faceNodeArr = faces[f].node
+
+    for c in range(nCells):
+
+      cellNodeArr = cells[c].node
+
+      if set(faceNodeArr).issubset(cellNodeArr):
+
+        faces[f].linkCell(c)
+        cells[c].linkFace(f)
+
+      if faces[f].nCells == 2:
+
+        break
+
+    assert(faces[f].nCells > 0)
+    assert(faces[f].nCells < 3)
+
+    if faces[f].nCells == 2:
+
+      # Not boundary face
+      faces[f].bndFlg = 0
+
+      # Cells must be neighbours 
+      c1 = faces[f].cell[0]
+      c2 = faces[f].cell[1]
+
+      cells[c1].linkNeighbour(c2)
+      cells[c2].linkNeighbour(c1)
+
+    elif faces[f].nCells == 1:
+
+      # Boundary face
+      faces[f].bndFlg = 1
+
+    complete = 100 * (f * nFacesInv)
+    """
+    if complete > completeOld + 1:
+
+      completeOld += 1
+      print completeOld
+    """
+
   print "Creating mesh"
   mesh = meshClass(nodes, cells, faces)
 
