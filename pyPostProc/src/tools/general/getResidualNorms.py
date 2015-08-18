@@ -66,11 +66,12 @@ def plotResidualNorms(filePath, fileName, time, normalise = True):
   eqNorms, sysNorm = getResidualNorms(filePath, fileName, time, normalise)
 
   linestyles = ['-', '--', '-.', ':']
-  markers = ['', '+', '*', 'o']
+  markers = ['', '+', '*', 'o', '^']
 
   nEq = len(eqNorms)
   l = 0
   m = 0
+  plt.figure(1)
   for eq in range(nEq):
 
     plt.plot(eqNorms[eq], label = "Equation " + str(eq), marker = markers[m], linestyle = linestyles[l], color='k')
@@ -100,3 +101,4 @@ def plotResidualNorms(filePath, fileName, time, normalise = True):
   plt.title("Residuals @ t = " + "%.3e" % time + " s")
 
   plt.show()
+
