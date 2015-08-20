@@ -1,0 +1,17 @@
+#################################################
+# astylerc                                      #
+#################################################
+
+# Brackets
+--style=allman
+
+# Indenting
+--indent=tab=2
+--indent-switches
+--indent-col1-comments
+
+# Padding
+
+# Formatting
+--add-brackets
+--max-code-length=72
