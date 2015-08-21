@@ -1,9 +1,6 @@
 #!/bin/sh
 
-PROC=0
-MEM=0
-
-awk -v proc=$PROC 'BEGIN { }
+awk 'BEGIN { }
 { if (NR==1) {
 	print "    Name   |  Np |  Mem |    Time    "
 	print "-----------|-----|------|------------" 
